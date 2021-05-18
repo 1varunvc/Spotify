@@ -42,7 +42,7 @@ app.post("/", function(req, res) {
   const query = req.body.queryValue;
 
   // Follow procedure here to get this key: https://benwiz.com/blog/create-spotify-refresh-token/
-  const token = "Bearer {access_token}" // Follow procedure here to get this key: https://benwiz.com/blog/create-spotify-refresh-token/
+  const token = "Bearer {access_token}"
   var searchUrl = "https://api.spotify.com/v1/search?q=" + query + "&type=tracks&limit=4";
 
   request({
