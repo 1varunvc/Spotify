@@ -1,8 +1,8 @@
 // It is a nodejs and expressjs project.
 const express = require("express");
 
-// https is used to fetch response from the API path. It is a native expressjs package and doesn't require us to create a new 'app' variable.
-const https = require("https");
+// // https is used to fetch response from the API path. It is a native expressjs package and doesn't require us to create a new 'app' variable.
+//const https = require("https");
 
 // body-parser is used to access tags from the html file. We'll be using it to access queryValue.
 const bodyParser = require("body-parser");
@@ -42,7 +42,8 @@ app.post("/", function(req, res) {
   const query = req.body.queryValue;
 
   // Follow procedure here to get this key: https://benwiz.com/blog/create-spotify-refresh-token/
-  const token = "Bearer {access_token}"
+  const access_token = {access_token};
+  const token = "Bearer " + access_token;
   var searchUrl = "https://api.spotify.com/v1/search?q=" + query + "&type=tracks&limit=4";
 
   request({
