@@ -1,14 +1,16 @@
-// It is a nodejs and expressjs project.
+// It is a nodejs, expressjs project.
 const express = require("express");
 
-// // https is used to fetch response from the API path. It is a native expressjs package and doesn't require us to create a new 'app' variable.
-//const https = require("https");
+// 'https' is used to fetch response from the API path. It is a native expressjs package and doesn't require us to create a new 'app' letiable.
+const https = require("https");
 
-// body-parser is used to access tags from the html file. We'll be using it to access queryValue.
+// 'body-parser' is used to access tags from the html file. We'll be using it to access queryValue.
 const bodyParser = require("body-parser");
 
-// request package used to fetch data from
+// request package; to fetch data from search endpoint.
 const request = require("request");
+
+const axios = require("axios");
 
 // This app constant is created to be able to access the menthods available in 'express' package.
 const app = express();
@@ -23,11 +25,14 @@ app.use(bodyParser.urlencoded({
 // A folder named 'public' has to be in the same directory as "app.js". The source files are stored here.
 app.use(express.static("public"));
 
-// ejs view engine has been used to use app.js variables into the output ejs file.
+// ejs view engine has been used to use app.js letiables into the output ejs file.
 app.set('view engine', 'ejs');
 
-// Variable(s) to store the data fetched from API endpoint.
-var data = "";
+// letiable(s) to store the data fetched from API endpoint.
+let spotifyTrackIdAppJs00 = "";
+let spotifyAlbumIdAppJs00 = "";
+let spotifyArtistIdAppJs00 = "";
+let spotifyResult = "";
 
 // The page to load when the browser (client) makes request to GET something from the server on "/", i.e., from the homepage.
 // This GET request is made as soon as the homepage url is entered in the address bar od browser, automatically.
@@ -41,32 +46,41 @@ app.post("/", function(req, res) {
   // The user input query. We are using body-parser package here.
   const query = req.body.queryValue;
 
-  // Follow procedure here to get this key: https://benwiz.com/blog/create-spotify-refresh-token/
+  // Follow procedure here to get access_token and refresh_token: https://benwiz.com/blog/create-spotify-refresh-token/
   const access_token = {access_token};
   const token = "Bearer " + access_token;
-  var searchUrl = "https://api.spotify.com/v1/search?q=" + query + "&type=tracks&limit=4";
+  let searchUrl = "https://api.spotify.com/v1/search?q=" + query + "&type=track%2Calbum%2Cartist&limit=4&market=IN";
 
-  request({
-    url: searchUrl,
-    headers: {
-      "Authorization": token
-    }
-  }, function(err, res) {
-    if (res) {
-      var data = JSON.parse(res.body);
-      // var spotifyTrackIdAppJs00 = data.tracks.items[0].id;
-      console.log(data);
-      // console.log(trackId);
-    }
+  //Using Axios to fetch data. It gets parsed to JSON automatically.
+  axios.get(searchUrl, {
+      headers: {
+        'Authorization': token,
+      }
+    })
+    .then((resAxios) => {
+      console.log(resAxios.data)
+      spotifyResult = resAxios.data;
 
-    // res.render("results", {
-    //   spotifyTrackIdEjs00: spotifyTrackIdAppJs00
-    // });
-    // console.log("Value to be used in rendered file: " + spotifyTrackIdAppJs00);
-  })
+      //Extracting required data from 'result'. The following "items[0].id.videoId" is the address of the data that we need from the JSON 'ytResult'.
+      let spotifyTrackIdAppJs00 = spotifyResult.tracks.items[0].id;
+      let spotifyAlbumIdAppJs00 = spotifyResult.tracks.items[0].album.id;
+      let spotifyArtistIdAppJs00 = spotifyResult.tracks.items[0].artists[0].id;
+      console.log("Fetched values: " + spotifyTrackIdAppJs00 + ", " + spotifyAlbumIdAppJs00 + ", " + spotifyArtistIdAppJs00);
+
+      // The 'results' named EJS file is rendered and fed in response. The 'required' data is passed into it using the following letiable(s).
+      // A folder named 'views' has to be in the same directory as "app.js". That folder contains 'results.ejs'.
+      res.render("results", {
+        spotifyTrackIdEjs00: spotifyTrackIdAppJs00,
+        spotifyAlbumIdEjs00: spotifyAlbumIdAppJs00,
+        spotifyArtistIdEjs00: spotifyArtistIdAppJs00
+      });
+      console.log("Values to be used in rendered file: " + spotifyTrackIdAppJs00 + ", " + spotifyAlbumIdAppJs00 + ", " + spotifyArtistIdAppJs00);
+    })
+    .catch((error) => {
+      console.error(error)
+    })
 });
-
 // Starting the server. Should this be placed at the top of all other commands?
 app.listen(3000, function() {
   console.log("Server is running on port 3000.")
-});
+})
