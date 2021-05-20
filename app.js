@@ -12,6 +12,9 @@ const request = require("request");
 
 const axios = require("axios");
 
+var FormData = require('form-data');
+var fs = require('fs');
+
 // This app constant is created to be able to access the menthods available in 'express' package.
 const app = express();
 
@@ -40,15 +43,41 @@ app.get("/", function(req, res) {
   res.sendFile(__dirname + "/index.html");
 });
 
+//Declaring token.
+let access_token = "";
+let token = "";
+
+// //Refreshing access_token
+axios({
+    url: "https://accounts.spotify.com/api/token",
+    method: "post",
+    params: {
+        grant_type: "refresh_token",
+        refresh_token: {refresh_token}
+    },
+    headers: {
+      Authorization:'Basic *<base64 encoded client_id:client_secret>*',
+        "Accept": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+}).then(function (response) {
+    // console.log(response.data);
+    // console.log(response.data.access_token);
+    access_token = response.data.access_token;
+    token = "Bearer " + access_token;
+    // console.log(token);
+}).catch(function (error) {
+    console.log(error);
+});
+
 // The data that server should POST when the POST request is sent by the client, upon entering the search queryValue, in the search bar (form).
 app.post("/", function(req, res) {
 
   // The user input query. We are using body-parser package here.
   const query = req.body.queryValue;
 
+
   // Follow procedure here to get access_token and refresh_token: https://benwiz.com/blog/create-spotify-refresh-token/
-  const access_token = {access_token};
-  const token = "Bearer " + access_token;
   let searchUrl = "https://api.spotify.com/v1/search?q=" + query + "&type=track%2Calbum%2Cartist&limit=4&market=IN";
 
   //Using Axios to fetch data. It gets parsed to JSON automatically.
