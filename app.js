@@ -76,57 +76,57 @@ app.get("/", function(req, res) {
 //Declaring token.
 let refresh_token = "AQCqYC-HTBM15P3ZYNpD-UnK0mLzQSuBrKJrRqlgXRH-GCBIWP0DeWMkUqCtvv0V1xWrIDBGOxx8No9aDCpE7_tbOx5R1e5WdWEXY-zAzmpjdK8g0dZY6sP7gpVjKBinEq8";
 let authorization = "Basic MWQ4ZjAwZGY4MDc0NDE5N2JiNWMwM2VmMzBkYmRlOGM6NzE4MTNhNTUyZjQzNGYzNDkzYWFlYTExODRmODdhYmU=";
-let access_token = "BQCWhGWb4jTdJiivNRMzWuAVSF1mfJCNfGxMCRPShWB7ySYgVg6XbcHZV-_qsFIexnPQge7eLHV6-OGliNyiyknUVynGT85sT5AFRVqDMdbKQZ9C33pH0z6WTIm8oE9UPqUXirNFr0zTXgo3X5PR0I4nDzYrfFucCvtbFKbTgpf_h6RVz4cLtZfvgTiE77r1udGXWvfQ1Nmai8yfDhqTRS1HbiLPdApH7xbgGz59gnZyJLgp_pygFmUNdRxZ14qtziKh8SQl717p1kZt8umz4axpy1KevcDDrtlCz_63JwHRLyk4";
+let access_token = "";
 let token = "Bearer " + access_token;
 
-// // Creating the first access token
-// axios({
-//   url: "https://accounts.spotify.com/api/token",
-//   method: "post",
-//   params: {
-//     grant_type: "refresh_token",
-//     refresh_token: refresh_token
-//   },
-//   headers: {
-//     Authorization: authorization,
-//     "Accept": "application/json",
-//     "Content-Type": "application/x-www-form-urlencoded"
-//   }
-// }).then(function(response) {
-//   // console.log(response.data);
-//   // console.log(response.data.access_token);
-//   access_token = response.data.access_token;
-//   token = "Bearer " + access_token;
-//   console.log(token);
-// }).catch(function(error) {
-//   console.log(error);
-// });
+// Creating the first access token
+axios({
+  url: "https://accounts.spotify.com/api/token",
+  method: "post",
+  params: {
+    grant_type: "refresh_token",
+    refresh_token: refresh_token
+  },
+  headers: {
+    Authorization: authorization,
+    "Accept": "application/json",
+    "Content-Type": "application/x-www-form-urlencoded"
+  }
+}).then(function(response) {
+  // console.log(response.data);
+  // console.log(response.data.access_token);
+  access_token = response.data.access_token;
+  token = "Bearer " + access_token;
+  console.log(token);
+}).catch(function(error) {
+  console.log(error);
+});
 
-// // Refreshing access_token, 59th minute of every hour. E.g., 04:59, 15:59.
-// // It is irrespective of the starting time of the server. I.e., if the server starts at 04:15, the following code would run at 04:59.
-// cron.schedule('*/59 * * * *', () => {
-//   axios({
-//     url: "https://accounts.spotify.com/api/token",
-//     method: "post",
-//     params: {
-//       grant_type: "refresh_token",
-//       refresh_token: refresh_token
-//     },
-//     headers: {
-//       Authorization: authorization,
-//       "Accept": "application/json",
-//       "Content-Type": "application/x-www-form-urlencoded"
-//     }
-//   }).then(function(response) {
-//     // console.log(response.data);
-//     // console.log(response.data.access_token);
-//     access_token = response.data.access_token;
-//     token = "Bearer " + access_token;
-//     console.log(token);
-//   }).catch(function(error) {
-//     console.log(error);
-//   });
-// });
+// Refreshing access_token, 59th minute of every hour. E.g., 04:59, 15:59.
+// It is irrespective of the starting time of the server. I.e., if the server starts at 04:15, the following code would run at 04:59.
+cron.schedule('*/59 * * * *', () => {
+  axios({
+    url: "https://accounts.spotify.com/api/token",
+    method: "post",
+    params: {
+      grant_type: "refresh_token",
+      refresh_token: refresh_token
+    },
+    headers: {
+      Authorization: authorization,
+      "Accept": "application/json",
+      "Content-Type": "application/x-www-form-urlencoded"
+    }
+  }).then(function(response) {
+    // console.log(response.data);
+    // console.log(response.data.access_token);
+    access_token = response.data.access_token;
+    token = "Bearer " + access_token;
+    console.log(token);
+  }).catch(function(error) {
+    console.log(error);
+  });
+});
 
 
 // The data that server should POST when the POST request is sent by the client, upon entering the search queryValue, in the search bar (form).
