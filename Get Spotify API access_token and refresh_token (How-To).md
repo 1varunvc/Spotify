@@ -1,6 +1,7 @@
 ## Get Spotify API access_token and refresh_token (How-To)
 
 Method 1: https://benwiz.com/blog/create-spotify-refresh-token/
+
 Method 2: https://developer.spotify.com/documentation/general/guides/authorization-guide/ (Using Authorization Code Flow)
 
 URL Encoded redirect_uri:
