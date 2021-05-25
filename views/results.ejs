@@ -41,7 +41,7 @@
     <% } %>
 
     <!-- Showcasing 4 artists that match queryValue. -->
-    <% for(i = 1; i < spotifyQueryArtistIdEjs.length; i++) { %>
+    <% for(i = 0; i < spotifyQueryArtistIdEjs.length; i++) { %>
       <iframe src="https://open.spotify.com/embed/artist/<%= spotifyQueryArtistIdEjs[i] %>" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
     <% } %>
   <% } %>
