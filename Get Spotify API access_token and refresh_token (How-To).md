@@ -2,7 +2,7 @@
 
 Method 1: https://benwiz.com/blog/create-spotify-refresh-token/
 
-Method 2: https://developer.spotify.com/documentation/general/guides/authorization-guide/ (Using Authorization Code Flow)
+Method 2: https://developer.spotify.com/documentation/general/guides/authorization-guide/#authorization-code-flow (Using Authorization Code Flow)
 
 URL Encoded redirect_uri:
   http%3A%2F%2Flocalhost%3A3000%2F
