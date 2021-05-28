@@ -49,11 +49,7 @@ let spotifyAlbumIdAppJs = [];
 let spotifyTrackArtistIdUniqueAppJs = [];
 let spotifyAlbumIdUniqueAppJs = [];
 
-// // https://stackoverflow.com/a/9229784/14597561
-// let s = ""; // 's' stands for Set.
-// let it = "";
-
-
+// https://stackoverflow.com/a/9229784/14597561
 function removeDuplicatesFromResults(arr) {
   var obj = {};
   var ret_arr = [];
