@@ -1,7 +1,7 @@
 // It is a nodejs, expressjs project.
 const express = require("express");
 
-// 'https' is used to fetch response from the API path. It is a native expressjs package and doesn't require us to create a new 'app' letiable.
+// 'https' is used to fetch response from the API path. It is a native expressjs package and doesn't require us to create a new 'app' constant.
 const https = require("https");
 
 // 'body-parser' is used to access tags from the html file. We'll be using it to access queryValue.
