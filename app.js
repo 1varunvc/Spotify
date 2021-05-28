@@ -16,8 +16,8 @@ const cron = require('node-cron');
 // This app constant is created to be able to access the menthods available in 'express' package.
 const app = express();
 
-// 'urlencoded' helps access html data. Other data formats could JSON etc.
-// body-parser required as to exclusively define "extended: true" although this is no use to us.
+// 'urlencoded' helps access html data. Other data formats could be JSON etc.
+// body-parser requires us to exclusively define "extended: true" although this is of no use to us right now.
 app.use(bodyParser.urlencoded({
   extended: true
 }));
@@ -26,7 +26,7 @@ app.use(bodyParser.urlencoded({
 // A folder named 'public' has to be in the same directory as "app.js". The source files are stored here.
 app.use(express.static("public"));
 
-// ejs view engine has been used to use app.js letiables into the output ejs file.
+// ejs view engine has been used to use app.js variables values into the output ejs file.
 app.set('view engine', 'ejs');
 
 // Starting the server.
@@ -185,7 +185,7 @@ app.post("/", function(req, res) {
       console.log("\n");
 
       // Removing redundant artists from spotifyTrackArtistIdAppJs and adding the unique values to spotifyTrackArtistIdUniqueAppJs.
-      // This is being done, because same artist was being displayed in the 'Artists' secction.
+      // This is being done, because same artist was being displayed in the 'Artists' section.
       spotifyTrackArtistIdUniqueAppJs = removeDuplicatesFromResults(spotifyTrackArtistIdAppJs);
       console.log("Unique Track Artists:")
       console.log(spotifyTrackArtistIdUniqueAppJs);
