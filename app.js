@@ -31,6 +31,8 @@
  //
  const passport = require("passport");
 
+ const User = require("./models/user-model");
+
  // This app constant is created to be able to access the menthods available in 'express' package.
  const app = express();
 
@@ -54,7 +56,8 @@
 
  // Set-up Cookies
  app.use(cookieSession({
-   maxAge: 14 * 24 * 60 * 60 * 1000,
+   // maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
+   maxAge: 60 * 60 * 1000,                 // 1 hour
    keys: [keys.session.cookieKey]
  }))
 
@@ -121,8 +124,10 @@
  app.post("/", function(req, res) {
 
    if (!req.user) {
-     // res.render("results");
-     res.redirect("/auth/spotify");
+     res.render("results", {
+       userEjs: req.user
+     });
+     // res.redirect("/auth/spotify");
 
    } else {
 
@@ -278,6 +283,9 @@
        .catch((error) => {
          console.error(error)
          // console.log("Error: '" + error.response.status + "': " + error.response.statusText);
+         if(error.response.status == 401) {
+           res.send("Access token expired. Please open the website again and login.")
+         }
        })
    }
  });

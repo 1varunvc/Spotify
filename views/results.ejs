@@ -9,34 +9,58 @@
 
 <body>
 
+  <div class="">
+    <a href="/"><h2>One Music</h2></a>
+  </div>
+
+  <div class="index-search-container">
+
+    <!-- POST request to fetch data related to queryValue.  -->
+    <form class="" action="/" method="post">
+      <input id="queryId" type="text" name="queryValue" value="" placeholder="search">
+      <button type="submit" name="button">HIT ME</button>
+    </form>
+
+  </div>
+
+  <br>
+
   <!-- Based upon whether the user exists, following if-else statement proceeds. -->
   <% if(userEjs) { %>
 
+    <div class="" style="position: absolute; right: 20px;">
+      <a href="auth/logout"><button type="button" name="button">Logout</button></a>
+    </div>
+
     <!-- Essentially, our aim is to have the source for iframes as per the data fetched using API calls.-->
+    <% if((spotifyTrackIdEjs.length + spotifyAlbumIdUniqueEjs.length + spotifyTrackArtistIdUniqueEjs.length) > 3 && spotifyTrackIdEjs != null && spotifyAlbumIdUniqueEjs != null && spotifyTrackArtistIdUniqueEjs != null ) { %>
 
     <h3>Listen (Spotify)</h3>
-    <!-- Track 00, Album 00_00, Artist 00_00, 00_01 (if exists, else hidden), Track 01, 02, 03  -->
-    <% let i = 0 %>
 
-    <!-- 0 Track 00 -->
-    <iframe src="https://open.spotify.com/embed/track/<%= spotifyTrackIdEjs[0] %>" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+      <!-- Track 00, Album 00_00, Artist 00_00, 00_01 (if exists, else hidden), Track 01, 02, 03  -->
+      <% let i = 0 %>
 
-    <!-- 0 Track 00 Album 00 -->
-    <iframe src="https://open.spotify.com/embed/album/<%= spotifyAlbumIdUniqueEjs[0] %>" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+      <!-- 0 Track 00 -->
+      <iframe src="https://open.spotify.com/embed?uri=spotify:track:<%= spotifyTrackIdEjs [0] %>" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
 
-    <!-- 0 Track 00 Artist 00-->
-    <iframe src="https://open.spotify.com/embed/artist/<%= spotifyTrackArtistIdUniqueEjs[0] %>" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+      <!-- 0 Track 00 Album 00 -->
+      <iframe src="https://open.spotify.com/embed?uri=spotify:album:<%= spotifyAlbumIdUniqueEjs[0] %>" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
 
-    <!-- Track 01, 02, 03 -->
-    <% for(i = 1; i < spotifyTrackIdEjs.length; i++) { %>
-    <iframe src="https://open.spotify.com/embed/track/<%= spotifyTrackIdEjs[i] %>" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+      <!-- 0 Track 00 Artist 00-->
+      <iframe src="https://open.spotify.com/embed/artist/<%= spotifyTrackArtistIdUniqueEjs[0] %>" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+
+      <!-- Track 01, 02, 03 -->
+      <% for(i = 1; i < spotifyTrackIdEjs.length; i++) { %>
+      <iframe src="https://open.spotify.com/embed/track/<%= spotifyTrackIdEjs[i] %>" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+      <% } %>
     <% } %>
+
 
     <!-- <h3>Watch (YouTube)</h3> -->
     <!-- Top 4 Videos -->
 
     <!-- We are putting greater than '2' in the following 'if', because both the Artist ID arrays contains atleast one element, even if its value is null. -->
-    <% if (((spotifyTrackArtistIdUniqueEjs.length) + (spotifyQueryArtistIdUniqueEjs.length)) > 2 && spotifyQueryArtistIdUniqueEjs != null) { %>
+    <% if (((spotifyTrackArtistIdUniqueEjs.length) + (spotifyQueryArtistIdUniqueEjs.length)) > 2 && spotifyTrackArtistIdUniqueEjs !=null && spotifyQueryArtistIdUniqueEjs != null) { %>
       <h3>Artists</h3>
 
       <!-- Showcasing all the next artists of Track 00 (if exists), all artists of Track 01 and Track 02.  -->
@@ -51,9 +75,14 @@
     <% } %>
 
 
+    <% if(spotifyAlbumIdUniqueEjs.length > 0 && spotifyAlbumIdUniqueEjs != null) { %>
+
     <h3>Albums</h3>
+
     <% for (i = 1; i < spotifyAlbumIdUniqueEjs.length; i++) { %>
     <iframe src="https://open.spotify.com/embed/album/<%= spotifyAlbumIdUniqueEjs[i] %>" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+    <% } %>
+
     <% } %>
 
     <!-- <h3>Live Performance</h3> -->
@@ -62,16 +91,21 @@
     <!-- <h3>Cover</h3> -->
     <!-- Top 5 covers (Smaller sized iFrame than 'Watch') -->
 
-    <div class="">
-      <a href="auth/logout"><button type="button" name="button">Logout</button></a>
-    </div>
-
   <% } else { %>
     <div class="">
       <a href="auth/spotify"><button type="button" name="button">Login (via Spotify)</button></a>
     </div>
 
   <% } %>
+
+  <script type="text/javascript">
+  <% if(!userEjs) { %>
+    window.confirm("This web app depends on Spotify. Click 'OK' to log-in. ");
+    if(confirm) {
+      window.location.href = "/auth/spotify";
+    }
+  <% } %>
+  </script>
 
 </body>
 
