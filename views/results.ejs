@@ -17,7 +17,7 @@
 
     <!-- POST request to fetch data related to queryValue.  -->
     <form class="" action="/" method="post">
-      <input id="queryId" type="text" name="queryValue" value="" placeholder="search">
+      <input id="queryId" type="text" name="queryValue" value="slow hands" placeholder="search">
       <button type="submit" name="button">HIT ME</button>
     </form>
 
@@ -41,17 +41,18 @@
       <% let i = 0 %>
 
       <!-- 0 Track 00 -->
-      <iframe src="https://open.spotify.com/embed?uri=spotify:track:<%= spotifyTrackIdEjs [0] %>" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+
+      <iframe src="https://open.spotify.com/embed/track/<%= spotifyTrackIdEjs[0].spotifyId %>" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
 
       <!-- 0 Track 00 Album 00 -->
-      <iframe src="https://open.spotify.com/embed?uri=spotify:album:<%= spotifyAlbumIdUniqueEjs[0] %>" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+      <iframe src="https://open.spotify.com/embed/track/<%= spotifyAlbumIdUniqueEjs[0] %>" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
 
       <!-- 0 Track 00 Artist 00-->
       <iframe src="https://open.spotify.com/embed/artist/<%= spotifyTrackArtistIdUniqueEjs[0] %>" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
 
       <!-- Track 01, 02, 03 -->
       <% for(i = 1; i < spotifyTrackIdEjs.length; i++) { %>
-      <iframe src="https://open.spotify.com/embed/track/<%= spotifyTrackIdEjs[i] %>" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+      <iframe src="https://open.spotify.com/embed/track/<%= spotifyTrackIdEjs[i].spotifyId %>" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
       <% } %>
     <% } %>
 
