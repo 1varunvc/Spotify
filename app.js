@@ -33,6 +33,9 @@
 
  const User = require("./models/user-model");
 
+ // The library to encode/decode weird text returned from API endpoint.
+ const he = require("he");
+
  // This app constant is created to be able to access the menthods available in 'express' package.
  const app = express();
 
@@ -77,7 +80,7 @@
    console.log("Connected to mongoDb Atlas.")
  });
 
- function removeDuplicatesFromResults(arr) {
+ function removeDuplicatesFrom(arr) {
    var obj = {};
    var ret_arr = [];
    for (var i = 0; i < arr.length; i++) {
@@ -101,17 +104,16 @@
  app.get("/", function(req, res) {
    // res.sendFile(__dirname + "/index.html");
    res.render("index", {
-     userEjs: req.user
+     user: req.user
    });
  });
-
 
  // The data that server should POST when the POST request is sent by the client, upon entering the search queryValue, in the search bar (form).
  app.post("/", function(req, res) {
 
    if (!req.user) {
      res.render("results", {
-       userEjs: req.user
+       user: req.user
      });
      // res.redirect("/auth/spotify");
 
@@ -157,10 +159,15 @@
      let spotifyAlbumId = [];
      let spotifyAlbumThumb = [];
      let spotifyAlbumName = [];
+     let spotifyTrackAlbumArtist = [];
+     let spotifyQueryAlbumArtist = [];
 
-     let spotifyAlbumUniqueId = [];
-     let spotifyAlbumUniqueThumb = [];
-     let spotifyAlbumUniqueName = [];
+     let spotifyUniqueAlbumId = [];
+     let spotifyUniqueAlbumThumb = [];
+     let spotifyUniqueAlbumName = [];
+     let spotifyUniqueTrackAlbumArtist = [];
+     let spotifyUniqueQueryAlbumArtist = [];
+     let spotifyUniqueAlbumArtist = [];
 
      // Follow procedure here to get access_token and refresh_token: https://benwiz.com/blog/create-spotify-refresh-token/
      let searchUrl = "https://api.spotify.com/v1/search?q=" + query + "&type=track%2Calbum%2Cartist&limit=4&market=IN";
@@ -185,9 +192,14 @@
            console.log("\n");
            for (i = 0; i < (spotifyResult.tracks.items).length; i++) {
              spotifyTrackId[i] = spotifyResult.tracks.items[i].id;
-             spotifyTrackThumb[i] = spotifyResult.tracks.items[i].album.images[2].url;
-             spotifyTrackTitle[i] = spotifyResult.tracks.items[i].name;
-             spotifyTrackArtist[i] = spotifyResult.tracks.items[i].artists[0].name;
+
+             if ((spotifyResult.tracks.items[i].album.images).length > 0)
+              spotifyTrackThumb[i] = spotifyResult.tracks.items[i].album.images[2].url;
+             else
+              spotifyTrackThumb[i] = "./img/defaults/album" + i + ".png";
+
+             spotifyTrackTitle[i] = he.decode(spotifyResult.tracks.items[i].name);
+             spotifyTrackArtist[i] = he.decode(spotifyResult.tracks.items[i].artists[0].name);
              console.groupCollapsed("\x1b[32m%s\x1b[0m", "Track 0" + i + ":");
              console.info(spotifyTrackId[i]);
              console.info(spotifyTrackThumb[i]);
@@ -202,18 +214,21 @@
            console.log(br2C, br2);
            // Allocating values to all the artists of Track 00.
            for (i = 0; i < (spotifyResult.tracks.items[0].artists).length; i++) {
-             spotifyTrackArtistId[i] = spotifyResult.tracks.items[0].artists[i].id;             //It is not able to set values for tracks with nore than 3 artists. e.g., Girls by Rita Ora.
+             spotifyTrackArtistId[i] = spotifyResult.tracks.items[0].artists[i].id; //It is not able to set values for tracks with nore than 3 artists. e.g., Girls by Rita Ora.
 
-             await axios.get("https://api.spotify.com/v1/artists/" + spotifyResult.tracks.items[0].artists[i].id, {
+             await axios.get("https://api.spotify.com/v1/artists/" + spotifyTrackArtistId[i], {
                headers: {
                  'Authorization': "Bearer " + req.user.accessToken,
                }
              }).then((resTrackArtistResult) => {
                // console.log(resTrackArtistResult);
-               spotifyTrackArtistThumb[i] = resTrackArtistResult.data.images[2].url;
+               if ((resTrackArtistResult.data.images).length > 0)
+                spotifyTrackArtistThumb[i] = resTrackArtistResult.data.images[2].url;
+               else
+                spotifyTrackArtistThumb[i] = "./img/defaults/artist" + i + ".png";
              })
 
-             spotifyTrackArtistName[i] = spotifyResult.tracks.items[0].artists[i].name;
+             spotifyTrackArtistName[i] = he.decode(spotifyResult.tracks.items[0].artists[i].name);
 
              console.groupCollapsed("\x1b[32m%s\x1b[0m", "Track 00 Artist 0" + i + ":");
              console.info(spotifyTrackArtistId[i]);
@@ -232,10 +247,13 @@
                  'Authorization': "Bearer " + req.user.accessToken,
                }
              }).then((resTrackArtistResult) => {
-               spotifyTrackArtistThumb[i] = resTrackArtistResult.data.images[2].url;
+               if ((resTrackArtistResult.data.images).length > 0)
+                spotifyTrackArtistThumb[i] = resTrackArtistResult.data.images[2].url;
+               else
+                spotifyTrackArtistThumb[i] = "./img/defaults/artist" + (i + 5) + ".png";
              })
 
-             spotifyTrackArtistName[i] = spotifyResult.tracks.items[1].artists[j].name;
+             spotifyTrackArtistName[i] = he.decode(spotifyResult.tracks.items[1].artists[j].name);
 
              console.groupCollapsed("\x1b[32m%s\x1b[0m", "Track 01 Artist 0" + j + ":");
              console.info(spotifyTrackArtistId[i]);
@@ -255,10 +273,13 @@
                  'Authorization': "Bearer " + req.user.accessToken,
                }
              }).then((resTrackArtistResult) => {
-               spotifyTrackArtistThumb[i] = resTrackArtistResult.data.images[2].url;
+               if ((resTrackArtistResult.data.images).length > 0)
+                spotifyTrackArtistThumb[i] = resTrackArtistResult.data.images[2].url;
+               else
+                spotifyTrackArtistThumb[i] = "./img/defaults/artist" + (i + 10) + ".png";
              })
 
-             spotifyTrackArtistName[i] = spotifyResult.tracks.items[2].artists[j].name;
+             spotifyTrackArtistName[i] = he.decode(spotifyResult.tracks.items[2].artists[j].name);
 
              console.groupCollapsed("\x1b[32m%s\x1b[0m", "Track 02 Artist 0" + j + ":");
              console.info(spotifyTrackArtistId[i]);
@@ -275,24 +296,30 @@
          if (spotifyResult.artists.items) {
            for (i = 0; i < (spotifyResult.artists.items).length; i++) {
              spotifyQueryArtistId[i] = spotifyResult.artists.items[i].id;
-             spotifyQueryArtistThumb[i] = spotifyResult.artists.items[i].images[2].url;
-             spotifyQueryArtistName[i] = spotifyResult.artists.items[0].name;
+
+            // Some artists do not have a user photo.
+             if ((spotifyResult.artists.items[i].images).length > 0)
+               spotifyQueryArtistThumb[i] = spotifyResult.artists.items[i].images[2].url;
+             else
+              spotifyQueryArtistThumb[i] = "./img/defaults/artist" + (i + 15) + ".png";
+
+             spotifyQueryArtistName[i] = he.decode(spotifyResult.artists.items[i].name);
 
              console.groupCollapsed("\x1b[32m%s\x1b[0m", "Query Artist 0" + i + ":");
              console.info(spotifyQueryArtistId[i]);
              console.info(spotifyQueryArtistThumb[i]);
              console.info(spotifyQueryArtistName[i]);
              console.groupEnd();
-            }
+           }
          }
 
          // Removing redundant artists from spotifyTrackArtist_ and adding the unique values to spotifyTrackArtistIdUnique.
          // This is being done, because same artist was being displayed in the 'Artists' secction.
          if ((spotifyResult.tracks.items).length > 0) {
            console.log("\n");
-           spotifyUniqueTrackArtistId = removeDuplicatesFromResults(spotifyTrackArtistId);
-           spotifyUniqueTrackArtistThumb = removeDuplicatesFromResults(spotifyTrackArtistThumb);
-           spotifyUniqueTrackArtistName = removeDuplicatesFromResults(spotifyTrackArtistName);
+           spotifyUniqueTrackArtistId = removeDuplicatesFrom(spotifyTrackArtistId);
+           spotifyUniqueTrackArtistThumb = removeDuplicatesFrom(spotifyTrackArtistThumb);
+           spotifyUniqueTrackArtistName = removeDuplicatesFrom(spotifyTrackArtistName);
            console.groupCollapsed("\x1b[32m%s\x1b[0m", "Unique Track Artists (ID):");
            console.info("\x1b[37m" + spotifyUniqueTrackArtistId + "\x1b[0m");
            console.groupEnd();
@@ -327,12 +354,24 @@
          // Values are allocated only if the values exist.
          if ((spotifyResult.tracks.items).length > 0) {
            spotifyAlbumId[0] = spotifyResult.tracks.items[0].album.id;
-           spotifyAlbumThumb[0] = spotifyResult.tracks.items[0].album.images[2].url;
-           spotifyAlbumName[0] = spotifyResult.tracks.items[0].name;
+
+           if ((spotifyResult.tracks.items[0].album.images).length > 0) {
+              spotifyAlbumThumb[0] = spotifyResult.tracks.items[0].album.images[2].url;
+           } else {
+              spotifyAlbumThumb[0] = "./img/defaults/album0.png";
+           }
+
+           spotifyAlbumName[0] = he.decode(spotifyResult.tracks.items[0].name);
+           spotifyTrackAlbumArtist[0] = he.decode(spotifyResult.tracks.items[0].album.artists[0].name);
+           /* This is commented because, compareAndRemove naturally removed the same artist, for everytime same artist was returned for the same album.
+            For e.g., See You Again and Summer Throwback are both returned in results and they both have 'Wiz Khalife as the Artist.
+            He was being comaparedAndRemoved twice. This resulted in mismatched ordering of artists from the other arrays.
+          */
            console.groupCollapsed("\x1b[32m%s\x1b[0m", "[00] Track 00 Album 00:");
            console.info("\x1b[37m" + spotifyAlbumId[0] + "\x1b[0m");
            console.info("\x1b[37m" + spotifyAlbumThumb[0] + "\x1b[0m");
            console.info("\x1b[37m" + spotifyAlbumName[0] + "\x1b[0m");
+           // console.info("\x1b[37m" + spotifyAlbumArtist[0] + "\x1b[0m");
            console.groupEnd();
          }
 
@@ -342,14 +381,22 @@
          // Values are allocated only if the values exist.
          if ((spotifyResult.tracks.items).length > 1) {
            spotifyAlbumId[1] = spotifyResult.tracks.items[1].album.id;
-           spotifyAlbumThumb[1] = spotifyResult.tracks.items[1].album.images[2].url;
-           spotifyAlbumId[1] = spotifyResult.tracks.items[1].album.name;
+
+           if ((spotifyResult.tracks.items[1].album.images).length > 0)
+            spotifyAlbumThumb[1] = spotifyResult.tracks.items[1].album.images[2].url;
+           else
+            spotifyTrackThumb[1] = "./img/defaults/album01.png";
+
+           spotifyAlbumName[1] = he.decode(spotifyResult.tracks.items[1].album.name);
+           spotifyTrackAlbumArtist[1] = he.decode(spotifyResult.tracks.items[1].album.artists[0].name);
            console.groupCollapsed("\x1b[32m%s\x1b[0m", "[01] Track 01 Album 00:");
            console.info("\x1b[37m" + spotifyAlbumId[1] + "\x1b[0m");
            console.info("\x1b[37m" + spotifyAlbumThumb[1] + "\x1b[0m");
            console.info("\x1b[37m" + spotifyAlbumName[1] + "\x1b[0m");
+           // console.info("\x1b[37m" + spotifyAlbumArtist[1] + "\x1b[0m");
            console.groupEnd();
          }
+
 
          // Providing album, if the user searches by album name. (Or artist name.)
          // Allocating value to 4 Albums that match the queryValue.
@@ -360,28 +407,53 @@
            console.log("\n");
            for (i = 2; i <= ((spotifyResult.albums.items).length) + 1; i++) {
              spotifyAlbumId[i] = spotifyResult.albums.items[i - 2].id;
-             spotifyAlbumThumb[i] = spotifyResult.albums.items[i - 2].images[2].url;
-             spotifyAlbumName[i] = spotifyResult.albums.items[i - 2].name;
-             console.groupCollapsed("\x1b[32m%s\x1b[0m", "[0" + i + "] " + "Top Result 0" + (i-2) + " Album:");
+
+             if ((spotifyResult.albums.items[i - 2].images).length > 0)
+              spotifyAlbumThumb[i] = spotifyResult.albums.items[i - 2].images[2].url;
+             else
+              spotifyAlbumThumb[i] = "./img/defaults/album" + (i + 2) + ".png";
+
+             spotifyAlbumName[i] = he.decode(spotifyResult.albums.items[i - 2].name);
+             spotifyQueryAlbumArtist[i - 2] = he.decode(spotifyResult.albums.items[i - 2].artists[0].name);
+
+             console.groupCollapsed("\x1b[32m%s\x1b[0m", "[0" + i + "] " + "Top Result 0" + (i - 2) + " Album:");
              console.info("\x1b[37m" + spotifyAlbumId[i] + "\x1b[0m");
              console.info("\x1b[37m" + spotifyAlbumThumb[i] + "\x1b[0m");
              console.info("\x1b[37m" + spotifyAlbumName[i] + "\x1b[0m");
+             // console.info("\x1b[37m" + spotifyAlbumArtist[i] + "\x1b[0m");
              console.groupEnd();
            }
 
            console.log("\n");
            // Removing redundant albums.
-           spotifyUniqueAlbumId = removeDuplicatesFromResults(spotifyAlbumId);
-           spotifyUniqueAlbumThumb = removeDuplicatesFromResults(spotifyAlbumThumb);
-           spotifyUniqueAlbumName = removeDuplicatesFromResults(spotifyAlbumName);
-           console.groupCollapsed("\x1b[32m%s\x1b[0m", "Unique Albums (ID):");
-           console.info("\x1b[37m" + spotifyAlbumId + "\x1b[0m");
+           spotifyUniqueAlbumId = removeDuplicatesFrom(spotifyAlbumId);
+           spotifyUniqueAlbumThumb = removeDuplicatesFrom(spotifyAlbumThumb);
+           spotifyUniqueAlbumName = removeDuplicatesFrom(spotifyAlbumName);
+
+           // We need all the album artists to maintain order. Hence, the following is commented.
+           // spotifyUniqueTrackAlbumArtist = await removeDuplicatesFrom(spotifyTrackAlbumArtist);
+           // spotifyUniqueQueryAlbumArtist = await removeDuplicatesFrom(spotifyQueryAlbumArtist);
+
+           // Following is being done, because we do not want redundant queryAlbumArtists. It goes with the order as well.
+           spotifyUniqueQueryAlbumArtist = compareAndRemove(spotifyQueryAlbumArtist, spotifyTrackAlbumArtist);
+
+           console.log(spotifyTrackAlbumArtist);
+           console.log("\n");
+           console.log(spotifyUniqueQueryAlbumArtist);
+           console.log("\n");
+           spotifyUniqueAlbumArtist = spotifyTrackAlbumArtist.concat(spotifyUniqueQueryAlbumArtist);
+           console.log(spotifyUniqueAlbumArtist);
+
+           console.groupCollapsed("\x1b[32m%s\x1b[0m", "Unique Album(s) (ID):");
+           console.info("\x1b[37m" + spotifyUniqueAlbumId + "\x1b[0m");
            console.groupEnd();
-           console.groupCollapsed("\x1b[32m%s\x1b[0m", "Unique Albums (Thumbnail):");
-           console.info("\x1b[37m" + spotifyAlbumThumb + "\x1b[0m");
+           console.groupCollapsed("\x1b[32m%s\x1b[0m", "Unique Album(s) (Thumbnail):");
+           console.info("\x1b[37m" + spotifyUniqueAlbumThumb + "\x1b[0m");
            console.groupEnd();
-           console.groupCollapsed("\x1b[32m%s\x1b[0m", "Unique Albums (Name):");
-           console.info("\x1b[37m" + spotifyAlbumName + "\x1b[0m");
+           console.groupCollapsed("\x1b[32m%s\x1b[0m", "Unique Album(s) (Name):");
+           console.info("\x1b[37m" + spotifyUniqueAlbumName + "\x1b[0m");
+           console.groupCollapsed("\x1b[32m%s\x1b[0m", "Unique Album Artist(s) (Name):");
+           console.info("\x1b[37m" + spotifyUniqueAlbumArtist + "\x1b[0m");
            console.groupEnd();
          }
 
@@ -389,73 +461,43 @@
          // A folder named 'views' has to be in the same directory as "app.js". That folder contains 'results.ejs'.
          res.render("results", {
            query: query,
-           userEjs: req.user,
+           user: req.user,
 
-           spotifyTrackIdEjs: spotifyTrackId,
-           spotifyTrackThumbEjs: spotifyTrackThumb,
-           spotifyTrackTitleEjs: spotifyTrackTitle,
-           spotifyTrackArtistEjs: spotifyTrackArtist,
+           spotifyTrackId: spotifyTrackId,
+           spotifyTrackThumb: spotifyTrackThumb,
+           spotifyTrackTitle: spotifyTrackTitle,
+           spotifyTrackArtist: spotifyTrackArtist,
 
-           spotifyTrackArtistIdEjs: spotifyTrackArtistId,
-           spotifyTrackArtistThumbEjs: spotifyTrackArtistThumb,
-           spotifyTrackArtistNameEjs: spotifyTrackArtistName,
+           spotifyTrackArtistId: spotifyTrackArtistId,
+           spotifyTrackArtistThumb: spotifyTrackArtistThumb,
+           spotifyTrackArtistName: spotifyTrackArtistName,
 
-           spotifyQueryArtistIdEjs: spotifyQueryArtistId,
-           spotifyQueryArtistThumbEjs: spotifyQueryArtistThumb,
+           spotifyQueryArtistId: spotifyQueryArtistId,
+           spotifyQueryArtistThumb: spotifyQueryArtistThumb,
            spotifyQueryArtistName: spotifyQueryArtistName,
 
-           spotifyUniqueTrackArtistIdEjs: spotifyUniqueTrackArtistId,
-           spotifyUniqueTrackArtistThumbEjs: spotifyUniqueTrackArtistThumb,
+           spotifyUniqueTrackArtistId: spotifyUniqueTrackArtistId,
+           spotifyUniqueTrackArtistThumb: spotifyUniqueTrackArtistThumb,
            spotifyUniqueTrackArtistName: spotifyUniqueTrackArtistName,
 
-           spotifyUniqueQueryArtistIdEjs: spotifyUniqueQueryArtistId,
-           spotifyUniqueQueryArtistThumbEjs: spotifyUniqueQueryArtistThumb,
-           spotifyUniqueQueryArtistNameEjs: spotifyUniqueQueryArtistName,
+           spotifyUniqueQueryArtistId: spotifyUniqueQueryArtistId,
+           spotifyUniqueQueryArtistThumb: spotifyUniqueQueryArtistThumb,
+           spotifyUniqueQueryArtistName: spotifyUniqueQueryArtistName,
 
-           spotifyAlbumIdEjs: spotifyAlbumId,
-           spotifyAlbumThumbEjs: spotifyAlbumThumb,
-           spotifyAlbumNameEjs: spotifyAlbumName,
+           spotifyAlbumId: spotifyAlbumId,
+           spotifyAlbumThumb: spotifyAlbumThumb,
+           spotifyAlbumName: spotifyAlbumName,
+           // spotifyAlbumArtist: spotifyAlbumArtist,
 
-           spotifyAlbumUniqueIdEjs: spotifyAlbumUniqueId,
-           spotifyAlbumUniqueThumbEjs: spotifyAlbumUniqueThumb,
-           spotifyAlbumUniqueNameEjs: spotifyAlbumUniqueName,
+           spotifyUniqueAlbumId: spotifyUniqueAlbumId,
+           spotifyUniqueAlbumThumb: spotifyUniqueAlbumThumb,
+           spotifyUniqueAlbumName: spotifyUniqueAlbumName,
+           spotifyUniqueAlbumArtist: spotifyUniqueAlbumArtist,
          })
-
-         // Emptying all the arrays. Not all the elements are over-ridden in the coming calls.
-         // For e.g., a Track with 4 artists, may assign values to first 4 places in the array.
-         // If the next query returns a Track with 1 artist, first place will be over-ridden while the next 3 places would keep the previous values which may interfere while showing results.ejs.
-         spotifyTrackId.length = 0;
-         spotifyTrackThumb.length = 0;
-         spotifyTrackTitle.length = 0;
-         spotifyTrackArtist.length = 0;
-
-         spotifyTrackArtistId.length = 0;
-         spotifyTrackArtistThumb.length = 0;
-         spotifyTrackArtistName.length = 0;
-
-         spotifyQueryArtistId.length = 0;
-         spotifyQueryArtistThumb.length = 0;
-         spotifyQueryArtistName.length = 0;
-
-         spotifyUniqueTrackArtistId.length = 0;
-         spotifyUniqueTrackArtistThumb.length = 0;
-         spotifyUniqueTrackArtistName.length = 0;
-
-         spotifyUniqueQueryArtistId.length = 0;
-         spotifyUniqueQueryArtistThumb.length = 0;
-         spotifyUniqueQueryArtistName.length = 0;
-
-         spotifyAlbumId.length = 0;
-         spotifyAlbumThumb.length = 0;
-         spotifyAlbumName.length = 0;
-
-         spotifyAlbumUniqueId.length = 0;
-         spotifyAlbumUniqueThumb.length = 0;
-         spotifyAlbumUniqueName.length = 0;
        })
        .catch((error) => {
-         // console.error(error)
-         console.log("Status '" + error.response.status + "': " + error.response.statusText);
+         // console.error(error);
+         // console.log("Status '" + error.response.status + "': " + error.response.statusText);
          // if(error.response.status == 401) {
          //   res.send("Access token expired. Please open the website again and login.")
          // }
@@ -463,117 +505,238 @@
    }
  });
 
- // //Declaring token.
- // let refresh_token = "AQCqYC-HTBM15P3ZYNpD-UnK0mLzQSuBrKJrRqlgXRH-GCBIWP0DeWMkUqCtvv0V1xWrIDBGOxx8No9aDCpE7_tbOx5R1e5WdWEXY-zAzmpjdK8g0dZY6sP7gpVjKBinEq8";
- // let authorization = "Basic MWQ4ZjAwZGY4MDc0NDE5N2JiNWMwM2VmMzBkYmRlOGM6NzE4MTNhNTUyZjQzNGYzNDkzYWFlYTExODRmODdhYmU=";
- // let access_token = "";
- // let token = "Bearer " + access_token;
+/* Attempt to update access token, using refresh token. Everything works, apart from User.findOneAndUpdate({ });.
+
+// // The following was added nearby, "app.post("/", function(req, res) {"
+
+// Global Variable for refresh token.
+// This is to be used further in the node-crone command. Hence, needs to be declared globally.
+let refresh_token = "";
+let spotify_id = "";
+
+// The data that server should POST when the POST request is sent by the client, upon entering the search queryValue, in the search bar (form).
+app.post("/", function(req, res) {
+
+  refresh_token = req.user.refreshToken;
+  spotify_id = req.user.spotifyId;
+
+ // Refreshing access_token, 59th minute of every hour. E.g., 04:59, 15:59.
+ // It is irrespective of the starting time of the server. I.e., if the server starts at 04:15, the following code would run at 04:59.
+
+ // We 'were', "Refreshing access_token, 59th minute of every hour."" But the following would run every second. This was done for development purpose.
+ cron.schedule('* * * * * ', (req, res) => {
+   axios({
+     url: "https://accounts.spotify.com/api/token",
+     method: "post",
+     params: {
+       grant_type: "refresh_token",
+       refresh_token: refresh_token
+     },
+     headers: {
+       Authorization: "Basic " + keys.spotify.authorization,
+       "Accept": "application/json",
+       "Content-Type": "application/x-www-form-urlencoded"
+     }
+   }).then(function(response) {
+     new_access_token = response.data.access_token;
+     // console.log("Sdfsdfsdfsdf           " + new_access_token);
+
+     console.log("Test 1          " + spotify_id);
+     User.findOneAndUpdate({
+       spotifyId: spotify_id
+     }, {
+       $set: {
+         accessToken: new_access_token
+       }
+     }, {
+       new: true,
+       useFindAndModify: false
+     })
+     console.log("Test 2");
+   }).then((response) => {
+     console.log("Access token updated to " + accessToken + ".");
+     console.log(response);
+   }).catch(function(error) {
+     console.log(error);
+   });
+ });
+*/
+
+/* Access Token and Refresh Token Related
+
+ // Declaring token.
+ let refresh_token = "AQCqYC-HTBM15P3ZYNpD-UnK0mLzQSuBrKJrRqlgXRH-GCBIWP0DeWMkUqCtvv0V1xWrIDBGOxx8No9aDCpE7_tbOx5R1e5WdWEXY-zAzmpjdK8g0dZY6sP7gpVjKBinEq8";
+ let authorization = "Basic MWQ4ZjAwZGY4MDc0NDE5N2JiNWMwM2VmMzBkYmRlOGM6NzE4MTNhNTUyZjQzNGYzNDkzYWFlYTExODRmODdhYmU=";
+ let access_token = "";
+ let token = "Bearer " + access_token;
 
 
- // // First Comment: The following is probably me following that chubby fella who built a react app for fetching your current devices and stuff.
- // let client_id = "1d8f00df80744197bb5c03ef30dbde8c";
- // let code = "";
- //
- // // Requesting authorization from user.
- // // For us, this step's aim is to have Spotify recognize the user and play full song instead of the sample 30 seconds.
- //
- // let authURL = "https://accounts.spotify.com/authorize?client_id=1d8f00df80744197bb5c03ef30dbde8c&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F&scope=user-read-playback-state%20app-remote-control%20user-modify-playback-state%20user-read-currently-playing%20user-read-playback-position%20user-read-email%20streaming"
- //
- // app.post("/", function(req, res) {
- //   res.redirect(authURL);
- // });
+ // First Comment: The following is probably me following that chubby fella who built a react app for fetching your current devices and stuff.
+ let client_id = "1d8f00df80744197bb5c03ef30dbde8c";
+ let code = "";
 
- // function onPageLoad() {
- //   if (window.location.search.length > 0) {
- //     handleRedirect();
- //   }
- // }
- //
- // function handleRedirect() {
- //   code = getCode();
- // }
- //
- // function getCode() {
- //   code = null;
- //   const queryString = window.location.search;
- //   if ( queryString.length > 0) {
- //     const urlParams = new urlSearchParams(queryString);
- //     code = urlParams.get('code');
- //   }
- //   return code;
- // }
- //
- // code = getCode();
+ // Requesting authorization from user.
+ // For us, this step's aim is to have Spotify recognize the user and play full song instead of the sample 30 seconds.
 
- // // Second Comment: Creating access token and refresh token using 'code'.
- // axios({
- //   url: "https://accounts.spotify.com/api/token",
- //   method: "post",
- //   params: {
- //     grant_type: "authorization_code",
- //     code: code,
- //     redirect_uri: "http://localhost:3000/"
- //   },
- //   headers: {
- //     Authorization: authorization,
- //     "Accept": "application/json",
- //     "Content-Type": "application/x-www-form-urlencoded"
- //   }
- // }).then(function(response) {
- //   // console.log(response.data);
- //   // console.log(response.data.access_token);
- //   access_token = response.data.access_token;
- //   token = "Bearer " + access_token;
- //   console.log(token);
- // }).catch(function(error) {
- //   console.log(error);
- // });
+ let authURL = "https://accounts.spotify.com/authorize?client_id=1d8f00df80744197bb5c03ef30dbde8c&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F&scope=user-read-playback-state%20app-remote-control%20user-modify-playback-state%20user-read-currently-playing%20user-read-playback-position%20user-read-email%20streaming"
 
- // // Third Comment: Creating the first access_token using refresh_token
- // axios({
- //   url: "https://accounts.spotify.com/api/token",
- //   method: "post",
- //   params: {
- //     grant_type: "refresh_token",
- //     refresh_token: refresh_token
- //   },
- //   headers: {
- //     Authorization: authorization,
- //     "Accept": "application/json",
- //     "Content-Type": "application/x-www-form-urlencoded"
- //   }
- // }).then(function(response) {
- //   // console.log(response.data);
- //   // console.log(response.data.access_token);
- //   access_token = response.data.access_token;
- //   token = "Bearer " + access_token;
- //   console.log(token);
- // }).catch(function(error) {
- //   console.log(error);
- // });
- //
- // // Refreshing access_token, 59th minute of every hour. E.g., 04:59, 15:59.
- // // It is irrespective of the starting time of the server. I.e., if the server starts at 04:15, the following code would run at 04:59.
- // cron.schedule('*/59 * * * *', () => {
- //   axios({
- //     url: "https://accounts.spotify.com/api/token",
- //     method: "post",
- //     params: {
- //       grant_type: "refresh_token",
- //       refresh_token: refresh_token
- //     },
- //     headers: {
- //       Authorization: authorization,
- //       "Accept": "application/json",
- //       "Content-Type": "application/x-www-form-urlencoded"
- //     }
- //   }).then(function(response) {
- //     // console.log(response.data);
- //     // console.log(response.data.access_token);
- //     access_token = response.data.access_token;
- //     token = "Bearer " + access_token;
- //     console.log(token);
- //   }).catch(function(error) {
- //     console.log(error);
- //   });
- // });
+ app.post("/", function(req, res) {
+   res.redirect(authURL);
+ });
+
+ function onPageLoad() {
+   if (window.location.search.length > 0) {
+     handleRedirect();
+   }
+ }
+
+ function handleRedirect() {
+   code = getCode();
+ }
+
+ function getCode() {
+   code = null;
+   const queryString = window.location.search;
+   if ( queryString.length > 0) {
+     const urlParams = new urlSearchParams(queryString);
+     code = urlParams.get('code');
+   }
+   return code;
+ }
+
+ code = getCode();
+
+ // Second Comment: Creating access token and refresh token using 'code'.
+ axios({
+   url: "https://accounts.spotify.com/api/token",
+   method: "post",
+   params: {
+     grant_type: "authorization_code",
+     code: code,
+     redirect_uri: "http://localhost:3000/"
+   },
+   headers: {
+     Authorization: authorization,
+     "Accept": "application/json",
+     "Content-Type": "application/x-www-form-urlencoded"
+   }
+ }).then(function(response) {
+   // console.log(response.data);
+   // console.log(response.data.access_token);
+   access_token = response.data.access_token;
+   token = "Bearer " + access_token;
+   console.log(token);
+ }).catch(function(error) {
+   console.log(error);
+ });
+
+ // Third Comment: Creating the first access_token using refresh_token
+ axios({
+   url: "https://accounts.spotify.com/api/token",
+   method: "post",
+   params: {
+     grant_type: "refresh_token",
+     refresh_token: refresh_token
+   },
+   headers: {
+     Authorization: authorization,
+     "Accept": "application/json",
+     "Content-Type": "application/x-www-form-urlencoded"
+   }
+ }).then(function(response) {
+   // console.log(response.data);
+   // console.log(response.data.access_token);
+   access_token = response.data.access_token;
+   token = "Bearer " + access_token;
+   console.log(token);
+ }).catch(function(error) {
+   console.log(error);
+ });
+*/
+
+ /*  Methods for fetching Album Artists.
+
+ // Method 1:
+ // The following approach was causing the loading time to be increase by (API Call Time) x resAlbumArtistResult.data.artists).length. Which is terribly slow.
+ await axios.get("https://api.spotify.com/v1/albums/artists?ids=" + spotifyUniqueAlbumId, {
+   headers: {
+     'Authorization': "Bearer " + req.user.accessToken,
+   }
+ }).then((resAlbumArtistResult) => {
+   for (i = 0; i < (resAlbumArtistResult.data.artists).length; i++) {
+     // console.log(resTrackArtistResult);
+     spotifyUniqueAlbumArtist[i] = resAlbumArtistResult.data.artists[i].name;
+   }
+ })
+
+ // Method 2:
+ // The following approach is now unnecessay.
+ // Allocating values to unique album artists. Track-wise, then Query-wise, and then concatinating the two to spotifyUniqueAlbumArtist.
+ for (i = 0; i < spotifyUniqueTrackAlbumArtist.length; i++) {
+   // console.log(spotifyUniqueAlbumId.length);
+   // console.log(i);
+   for (j = 0; j < 1; j++) {
+     // console.log("    " + j);
+     if (JSON.stringify(spotifyUniqueTrackAlbumArtist[i]).localeCompare(JSON.stringify(spotifyResult.tracks.items[j].album.id)) == 0) {
+       console.log("    Matched pairs: " + i + "    " + j);
+       console.log("    " + JSON.stringify(spotifyUniqueTrackAlbumArtist[i]));
+       console.log("    " + JSON.stringify(spotifyResult.albums.items[j].id));
+       spotifyUniqueAlbumArtist[i] = spotifyResult.tracks.items[j].album.artists[0].name;
+       console.log(spotifyUniqueAlbumArtist[i]);
+       break;
+     }
+   }
+ }
+
+ for (i = spotifyUniqueTrackAlbumArtist.length; i < (spotifyUniqueTrackAlbumArtist.length + spotifyUniqueQueryAlbumArtist.length); i++) {
+   // console.log(spotifyUniqueAlbumId.length);
+   // console.log(i);
+   for (j = 0; j < 2; j++) {
+     // console.log("    " + j);
+     if (JSON.stringify(spotifyUniqueQueryAlbumArtist[i]).localeCompare(JSON.stringify(spotifyResult.albums.items[j].id)) == 0) {
+       console.log("    Matched pairs: " + i + "    " + j);
+       console.log("    " + JSON.stringify(spotifyUniqueQueryAlbumArtist[i]));
+       console.log("    " + JSON.stringify(spotifyResult.albums.items[j].id));
+       spotifyUniqueAlbumArtist[i] = spotifyResult.albums.items[j].artists[0].name;
+       console.log(spotifyUniqueAlbumArtist[i]);
+       break;
+     }
+   }
+ }
+*/
+
+/* Since we are now declaring the variables locally. We need not to empty every array.
+// Emptying all the arrays. Not all the elements are over-ridden in the coming calls.
+// For e.g., a Track with 4 artists, may assign values to first 4 places in the array.
+// If the next query returns a Track with 1 artist, first place will be over-ridden while the next 3 places would keep the previous values which may interfere while showing results.ejs.
+spotifyTrackId.length = 0;
+spotifyTrackThumb.length = 0;
+spotifyTrackTitle.length = 0;
+spotifyTrackArtist.length = 0;
+
+spotifyTrackArtistId.length = 0;
+spotifyTrackArtistThumb.length = 0;
+spotifyTrackArtistName.length = 0;
+
+spotifyQueryArtistId.length = 0;
+spotifyQueryArtistThumb.length = 0;
+spotifyQueryArtistName.length = 0;
+
+spotifyUniqueTrackArtistId.length = 0;
+spotifyUniqueTrackArtistThumb.length = 0;
+spotifyUniqueTrackArtistName.length = 0;
+
+spotifyUniqueQueryArtistId.length = 0;
+spotifyUniqueQueryArtistThumb.length = 0;
+spotifyUniqueQueryArtistName.length = 0;
+
+spotifyAlbumId.length = 0;
+spotifyAlbumThumb.length = 0;
+spotifyAlbumName.length = 0;
+spotifyAlbumArtist.length = 0;
+
+spotifyUniqueAlbumId.length = 0;
+spotifyUniqueAlbumThumb.length = 0;
+spotifyUniqueAlbumName.length = 0;
+spotifyUniqueAlbumArtist.length = 0;
+*/
