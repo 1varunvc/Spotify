@@ -167,8 +167,6 @@
         $(this).animate({'backgroundColor': 'black'}, 200);
     });
 
-  $('.yt').animate({backgroundColor: '#400101'})
-
   <% for(i = 0; i < Object.keys(spotifyTrackId).length; i++) { %>
     $("#spotifyTrackId<%= i %>").on("click", () => {
       $(".nowPlayingContainer").html(

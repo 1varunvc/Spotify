@@ -4,9 +4,10 @@
 <head>
   <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
   <title>One Music</title>
-  <link rel="stylesheet" href="styles/index.css">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap&family=Roboto+Slab:wght@400" rel="stylesheet">
+  <link rel="stylesheet" href="styles/index.css">
+  <link rel="icon" href="img/logo/one_music-short-4.0.svg" type="image/svg+xml">
 </head>
 
 <body onload="onPageLoad()">
@@ -14,20 +15,20 @@
   <section class="logoSearchLogin">
 
     <header>
-      <a class="logo" id="header" href="http://localhost:3000/"><img class="logoImg" src="img/logo/one_music-short-2.3.3-long-2.0-loop_count-1.gif" alt="One Music"></a>
+      <a class="logo" id="header" href="/"><img class="logoImg" src="img/logo/one_music-short-2.3.3-long-2.0-loop_count-1.gif" alt="One Music"></a>
     </header>
 
     <!-- POST request to fetch data related to queryValue.  -->
     <form class="searchForm" action="/" method="post">
       <div class="searchInputContainer">
-        <input class="searchInput" id="queryId" type="search" name="queryValue" placeholder="Search" autocomplete="off" value="slow hands" required>
+        <input class="searchInput" id="queryId" type="search" name="queryValue" placeholder="Search" autocomplete="off" required>
         <button class="searchButton" type="submit" name="button">
           &#5125;&#xFE0E;
         </button>
       </div>
     </form>
 
-    <% if(userEjs) { %>
+    <% if(user) { %>
       </section>
 
       <a class="logout" href="auth/logout">Logout</a>
