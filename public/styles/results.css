@@ -223,9 +223,9 @@ hr {
   justify-content: center;
 }
 
-.pwa {
+/* .pwa {
   height: 2.204rem;
-}
+} */
 
 .googlePlay {
   height: 3.335rem;
@@ -338,7 +338,7 @@ hr {
   .searchButton {
     right: 21.5%;
     height: 2.7rem;
-    font-size: 1.3em;
+    font-size: 1.3rem;
   }
 
   .itemHeading {
