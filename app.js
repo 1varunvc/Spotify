@@ -31,6 +31,7 @@
  //
  const passport = require("passport");
 
+//
  const User = require("./models/user-model");
 
  // The library to encode/decode weird text returned from API endpoint.
@@ -165,7 +166,7 @@
      let spotifyUniqueAlbumId = [];
      let spotifyUniqueAlbumThumb = [];
      let spotifyUniqueAlbumName = [];
-     let spotifyUniqueTrackAlbumArtist = [];
+     // let spotifyUniqueTrackAlbumArtist = [];
      let spotifyUniqueQueryAlbumArtist = [];
      let spotifyUniqueAlbumArtist = [];
 
@@ -210,7 +211,7 @@
          }
 
          // Values are allocated only if the values exist.
-         if ((spotifyResult.tracks.items[0].artists).length > 0 && (spotifyResult.tracks.items[1].artists).length > 0 && (spotifyResult.tracks.items[2].artists).length > 0) {
+         if ((spotifyResult.tracks.items).length > 0 && (spotifyResult.tracks.items).length > 0 && (spotifyResult.tracks.items).length > 0) {
            console.log(br2C, br2);
            // Allocating values to all the artists of Track 00.
            for (i = 0; i < (spotifyResult.tracks.items[0].artists).length; i++) {
@@ -290,10 +291,10 @@
            }
          }
 
-         console.log("\n");
          // Allocating values to 4 artists if the user searches by Artist name. I.e., results matching query value.
          // Values are allocated only if the values exist.
-         if (spotifyResult.artists.items) {
+         if ((spotifyResult.artists.items).length > 0) {
+           console.log("\n");
            for (i = 0; i < (spotifyResult.artists.items).length; i++) {
              spotifyQueryArtistId[i] = spotifyResult.artists.items[i].id;
 
@@ -331,7 +332,7 @@
            console.groupEnd();
          }
 
-         if (spotifyResult.artists.items) {
+         if ((spotifyResult.artists.items).length > 0) {
            console.log("\n");
            spotifyUniqueQueryArtistId = compareAndRemove(spotifyQueryArtistId, spotifyUniqueTrackArtistId);
            spotifyUniqueQueryArtistThumb = compareAndRemove(spotifyQueryArtistThumb, spotifyUniqueTrackArtistThumb);
@@ -347,12 +348,12 @@
            console.groupEnd();
          }
 
-         console.log(br2C, br2);
          // Providing album, if the user searches by Track name. (Or artist name.)
          // Allocating value to Album 00 of Track 00. This particular value is being alloted in 0th place of this array.
          // QueryArtists are all unique.
          // Values are allocated only if the values exist.
          if ((spotifyResult.tracks.items).length > 0) {
+           console.log(br2C, br2);
            spotifyAlbumId[0] = spotifyResult.tracks.items[0].album.id;
 
            if ((spotifyResult.tracks.items[0].album.images).length > 0) {
@@ -424,84 +425,91 @@
              console.groupEnd();
            }
 
-           console.log("\n");
            // Removing redundant albums.
            spotifyUniqueAlbumId = removeDuplicatesFrom(spotifyAlbumId);
            spotifyUniqueAlbumThumb = removeDuplicatesFrom(spotifyAlbumThumb);
            spotifyUniqueAlbumName = removeDuplicatesFrom(spotifyAlbumName);
 
-           // We need all the album artists to maintain order. Hence, the following is commented.
-           // spotifyUniqueTrackAlbumArtist = await removeDuplicatesFrom(spotifyTrackAlbumArtist);
-           // spotifyUniqueQueryAlbumArtist = await removeDuplicatesFrom(spotifyQueryAlbumArtist);
+           /*
+            We need all the _AlbumArtists to maintain order. Hence, this is commented.
+            spotifyUniqueTrackAlbumArtist = await removeDuplicatesFrom(spotifyTrackAlbumArtist);
+            spotifyUniqueQueryAlbumArtist = await removeDuplicatesFrom(spotifyQueryAlbumArtist);
+          */
 
            // Following is being done, because we do not want redundant queryAlbumArtists. It goes with the order as well.
            spotifyUniqueQueryAlbumArtist = compareAndRemove(spotifyQueryAlbumArtist, spotifyTrackAlbumArtist);
 
-           console.log(spotifyTrackAlbumArtist);
-           console.log("\n");
-           console.log(spotifyUniqueQueryAlbumArtist);
-           console.log("\n");
            spotifyUniqueAlbumArtist = spotifyTrackAlbumArtist.concat(spotifyUniqueQueryAlbumArtist);
-           console.log(spotifyUniqueAlbumArtist);
 
-           console.groupCollapsed("\x1b[32m%s\x1b[0m", "Unique Album(s) (ID):");
-           console.info("\x1b[37m" + spotifyUniqueAlbumId + "\x1b[0m");
+           console.log("\n");
+           console.groupCollapsed("spotifyTrackAlbumArtist:");
+           console.log(spotifyTrackAlbumArtist);
            console.groupEnd();
-           console.groupCollapsed("\x1b[32m%s\x1b[0m", "Unique Album(s) (Thumbnail):");
-           console.info("\x1b[37m" + spotifyUniqueAlbumThumb + "\x1b[0m");
+           console.log("\n");
+           console.groupCollapsed("spotifyUniqueQueryAlbumArtist:");
+           console.log(spotifyUniqueQueryAlbumArtist);
            console.groupEnd();
-           console.groupCollapsed("\x1b[32m%s\x1b[0m", "Unique Album(s) (Name):");
-           console.info("\x1b[37m" + spotifyUniqueAlbumName + "\x1b[0m");
-           console.groupCollapsed("\x1b[32m%s\x1b[0m", "Unique Album Artist(s) (Name):");
-           console.info("\x1b[37m" + spotifyUniqueAlbumArtist + "\x1b[0m");
+
+           console.log("\n");
+           console.groupCollapsed("Unique Album(s) (ID):");
+           console.info(spotifyUniqueAlbumId);
+           console.groupEnd();
+           console.groupCollapsed("Unique Album(s) (Thumbnail):");
+           console.info(spotifyUniqueAlbumThumb);
+           console.groupEnd();
+           console.groupCollapsed("Unique Album(s) (Name):");
+           console.info(spotifyUniqueAlbumName);
+           console.groupEnd();
+           console.groupCollapsed("Unique Album Artist(s) (Name):");
+           console.info(spotifyUniqueAlbumArtist);
            console.groupEnd();
          }
 
          // The 'results' named EJS file is rendered and fed in response. The 'required' data is passed into it using the following variable(s).
          // A folder named 'views' has to be in the same directory as "app.js". That folder contains 'results.ejs'.
-         res.render("results", {
-           query: query,
-           user: req.user,
 
-           spotifyTrackId: spotifyTrackId,
-           spotifyTrackThumb: spotifyTrackThumb,
-           spotifyTrackTitle: spotifyTrackTitle,
-           spotifyTrackArtist: spotifyTrackArtist,
+         // if(spotifyTrackId.length > 1 && spotifyUniqueTrackArtistId.length > 1 && spotifyUniqueQueryArtistId.length > 1 && spotifyUniqueAlbumId.length > 1) {
+         //   res.render("noResults", {
+         //     query: query,
+         //     user: req.user
+         //   });
+         // }
+         // else {
+           res.render("results", {
+             query: query,
+             user: req.user,
 
-           spotifyTrackArtistId: spotifyTrackArtistId,
-           spotifyTrackArtistThumb: spotifyTrackArtistThumb,
-           spotifyTrackArtistName: spotifyTrackArtistName,
+             spotifyTrackId: spotifyTrackId,
+             spotifyTrackThumb: spotifyTrackThumb,
+             spotifyTrackTitle: spotifyTrackTitle,
+             spotifyTrackArtist: spotifyTrackArtist,
 
-           spotifyQueryArtistId: spotifyQueryArtistId,
-           spotifyQueryArtistThumb: spotifyQueryArtistThumb,
-           spotifyQueryArtistName: spotifyQueryArtistName,
+             spotifyUniqueTrackArtistId: spotifyUniqueTrackArtistId,
+             spotifyUniqueTrackArtistThumb: spotifyUniqueTrackArtistThumb,
+             spotifyUniqueTrackArtistName: spotifyUniqueTrackArtistName,
 
-           spotifyUniqueTrackArtistId: spotifyUniqueTrackArtistId,
-           spotifyUniqueTrackArtistThumb: spotifyUniqueTrackArtistThumb,
-           spotifyUniqueTrackArtistName: spotifyUniqueTrackArtistName,
+             spotifyUniqueQueryArtistId: spotifyUniqueQueryArtistId,
+             spotifyUniqueQueryArtistThumb: spotifyUniqueQueryArtistThumb,
+             spotifyUniqueQueryArtistName: spotifyUniqueQueryArtistName,
 
-           spotifyUniqueQueryArtistId: spotifyUniqueQueryArtistId,
-           spotifyUniqueQueryArtistThumb: spotifyUniqueQueryArtistThumb,
-           spotifyUniqueQueryArtistName: spotifyUniqueQueryArtistName,
+             spotifyAlbumId: spotifyAlbumId,
+             spotifyAlbumThumb: spotifyAlbumThumb,
+             spotifyAlbumName: spotifyAlbumName,
+             // spotifyAlbumArtist: spotifyAlbumArtist,
 
-           spotifyAlbumId: spotifyAlbumId,
-           spotifyAlbumThumb: spotifyAlbumThumb,
-           spotifyAlbumName: spotifyAlbumName,
-           // spotifyAlbumArtist: spotifyAlbumArtist,
-
-           spotifyUniqueAlbumId: spotifyUniqueAlbumId,
-           spotifyUniqueAlbumThumb: spotifyUniqueAlbumThumb,
-           spotifyUniqueAlbumName: spotifyUniqueAlbumName,
-           spotifyUniqueAlbumArtist: spotifyUniqueAlbumArtist,
-         })
-       })
-       .catch((error) => {
-         // console.error(error);
-         // console.log("Status '" + error.response.status + "': " + error.response.statusText);
+             spotifyUniqueAlbumId: spotifyUniqueAlbumId,
+             spotifyUniqueAlbumThumb: spotifyUniqueAlbumThumb,
+             spotifyUniqueAlbumName: spotifyUniqueAlbumName,
+             spotifyUniqueAlbumArtist: spotifyUniqueAlbumArtist,
+           })
+         // }
+       }).catch((error) => {
+         console.error(error);
+         console.log("Status '" + error.response.status + "': " + error.response.statusText);
          // if(error.response.status == 401) {
          //   res.send("Access token expired. Please open the website again and login.")
          // }
-       })
+       });
    }
  });
 
@@ -520,10 +528,10 @@ app.post("/", function(req, res) {
   refresh_token = req.user.refreshToken;
   spotify_id = req.user.spotifyId;
 
+  // // The attempt:
  // Refreshing access_token, 59th minute of every hour. E.g., 04:59, 15:59.
  // It is irrespective of the starting time of the server. I.e., if the server starts at 04:15, the following code would run at 04:59.
-
- // We 'were', "Refreshing access_token, 59th minute of every hour."" But the following would run every second. This was done for development purpose.
+ // We 'were', "Refreshing access_token, 59th minute of every hour." But the following would run every second. This was done for development purpose.
  cron.schedule('* * * * * ', (req, res) => {
    axios({
      url: "https://accounts.spotify.com/api/token",
@@ -739,4 +747,14 @@ spotifyUniqueAlbumId.length = 0;
 spotifyUniqueAlbumThumb.length = 0;
 spotifyUniqueAlbumName.length = 0;
 spotifyUniqueAlbumArtist.length = 0;
+*/
+
+/* Unnecessary renders
+spotifyTrackArtistId: spotifyTrackArtistId,
+spotifyTrackArtistThumb: spotifyTrackArtistThumb,
+spotifyTrackArtistName: spotifyTrackArtistName,
+
+spotifyQueryArtistId: spotifyQueryArtistId,
+spotifyQueryArtistThumb: spotifyQueryArtistThumb,
+spotifyQueryArtistName: spotifyQueryArtistName,
 */
